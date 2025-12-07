@@ -61,20 +61,40 @@ export async function indexRepositories(
     // Note: The actual File Search API may have different implementation
     // This is a simplified version based on the Gemini AI SDK
     const store = await ai.fileSearchStores.create({
-      displayName: `${username}-repos-${Date.now()}`,
+      config: { displayName: `${username}-repos-${Date.now()}` },
     });
 
     // Upload files to the store
     for (const file of filesToUpload) {
-      await ai.files.upload({
-        file: new Blob([file.content], { type: 'text/plain' }),
-        name: file.name,
-        fileSearchStoreId: store.name,
+      const fileBlob = new Blob([file.content], { type: 'text/plain' });
+      
+      const uploadOperation = await ai.fileSearchStores.uploadToFileSearchStore({
+        fileSearchStoreName: store.name!,
+        file: fileBlob,
+        config: {
+          displayName: file.name,
+        },
       });
+
+      // Wait for upload to complete
+      let operation = uploadOperation;
+      let attempts = 0;
+      const maxAttempts = 15; // 30 seconds max wait
+      
+      while (!operation.done && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+          operation = await ai.operations.get({ operation: operation });
+        } catch (opError) {
+          console.error(`Error checking operation status:`, opError);
+          break;
+        }
+        attempts++;
+      }
     }
 
     return {
-      storeName: store.name,
+      storeName: store.name!,
       filesIndexed: filesToUpload.length,
     };
   } catch (error: any) {
@@ -116,7 +136,7 @@ Example format:
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
         tools: [
