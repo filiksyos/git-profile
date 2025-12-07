@@ -24,6 +24,7 @@ interface Repository {
 export default function Home() {
   const [username, setUsername] = useState('');
   const [apiKey, setApiKey] = useState('');
+  const [focus, setFocus] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
   const [profile, setProfile] = useState<string[]>([]);
@@ -126,6 +127,7 @@ export default function Home() {
         body: JSON.stringify({
           storeName,
           apiKey,
+          focus: focus.trim() || undefined,
         }),
       });
 
@@ -185,36 +187,50 @@ export default function Home() {
               />
             </div>
           </div>
+          
+          <div className="flex flex-col md:flex-row gap-6 mt-6">
+            <div className="md:w-1/2">
+              <Label htmlFor="focus">Focus (Optional)</Label>
+              <Input
+                id="focus"
+                type="text"
+                placeholder="e.g., coding style, dependency versions, tech stack, UI"
+                value={focus}
+                onChange={(e) => setFocus(e.target.value)}
+                className="mt-2"
+              />
+            </div>
 
-          <div className="flex flex-wrap gap-4 mt-6">
-            <Button
-              onClick={handleListRepositories}
-              disabled={loading || !username}
-              className="flex items-center gap-2"
-            >
-              <Github className="w-4 h-4" />
-              {loading ? 'Loading...' : 'List Repositories'}
-            </Button>
+            <div className="flex flex-wrap gap-4 items-end md:w-1/2">
+              <Button
+                onClick={handleListRepositories}
+                disabled={loading || !username}
+                className="flex items-center gap-2"
+              >
+                <Github className="w-4 h-4" />
+                {loading ? 'Loading...' : 'List Repositories'}
+              </Button>
 
-            <Button
-              onClick={handleIndexRepositories}
-              disabled={indexing || selectedRepos.length === 0 || !apiKey}
-              variant="secondary"
-              className="flex items-center gap-2"
-            >
-              <Database className="w-4 h-4" />
-              {indexing ? 'Indexing...' : `Index ${selectedRepos.length > 0 ? `(${selectedRepos.length})` : 'Repositories'}`}
-            </Button>
+              <Button
+                onClick={handleIndexRepositories}
+                disabled={indexing || selectedRepos.length === 0 || !apiKey}
+                variant="secondary"
+                className="flex items-center gap-2"
+              >
+                <Database className="w-4 h-4" />
+                {indexing ? 'Indexing...' : `Index ${selectedRepos.length > 0 ? `(${selectedRepos.length})` : 'Repositories'}`}
+              </Button>
 
-            <Button
-              onClick={handleGenerateProfile}
-              disabled={generating || !storeName || !apiKey}
-              variant="default"
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              <Sparkles className="w-4 h-4" />
-              {generating ? 'Generating...' : 'Generate Profile'}
-            </Button>
+              <Button
+                onClick={handleGenerateProfile}
+                disabled={generating || !storeName || !apiKey}
+                variant="default"
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <Sparkles className="w-4 h-4" />
+                {generating ? 'Generating...' : 'Generate Profile'}
+              </Button>
+            </div>
           </div>
 
           {error && (

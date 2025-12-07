@@ -108,31 +108,20 @@ export async function indexRepositories(
  */
 export async function generateCodingProfile(
   storeName: string,
-  apiKey: string
+  apiKey: string,
+  focus?: string
 ): Promise<string[]> {
   const ai = new GoogleGenAI({ apiKey });
 
+  const focusGuidance = focus 
+    ? `\n\nIMPORTANT: Pay special attention to aspects related to "${focus}". While still generating 20 diverse bullet points, prioritize insights about ${focus} when analyzing the code.`
+    : '';
+
   const prompt = `Analyze this developer's code and generate exactly 20 specific, insightful bullet points about their coding style and preferences. Each point should be a concise phrase starting with a dash. Focus on:
 
-- Specific technology versions they prefer (e.g., "prefers React 18 with TypeScript")
-- Package manager preferences (npm, yarn, pnpm)
-- Code organization patterns
-- Naming conventions
-- Architecture choices
-- Framework and library preferences
-- Testing approaches
-- Documentation style
-- Code formatting preferences
-- Error handling patterns
+${focusGuidance}
 
-Return ONLY the 20 bullet points, one per line, each starting with "- ". Be specific and data-driven based on the actual code.
-
-Example format:
-- Prefers pnpm over npm for package management
-- Uses TypeScript strict mode in all projects
-- Follows functional programming patterns with React hooks
-- Names components using PascalCase convention
-- Organizes code with feature-based folder structure`;
+Return ONLY the 20 bullet points, one per line, each starting with "- ". Be specific and data-driven based on the actual code.`;
 
   try {
     const response = await ai.models.generateContent({

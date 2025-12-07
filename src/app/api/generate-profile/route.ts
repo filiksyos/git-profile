@@ -4,7 +4,7 @@ import { generateCodingProfile } from '@/lib/gemini';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { storeName, apiKey } = body;
+    const { storeName, apiKey, focus } = body;
 
     if (!storeName) {
       return NextResponse.json(
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const profile = await generateCodingProfile(storeName, apiKey);
+    const profile = await generateCodingProfile(storeName, apiKey, focus);
 
     return NextResponse.json({
       profile,
